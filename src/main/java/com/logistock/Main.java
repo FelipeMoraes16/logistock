@@ -5,6 +5,7 @@ import com.logistock.model.Produto;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.math.BigDecimal;
 
 public class Main {
     public static void main(String[] args) {
@@ -34,15 +35,6 @@ public class Main {
                 case 1:
                     System.out.println("\nCADASTRO DO PRODUTO");
 
-                    // CADASTRO DO ID
-                    String mensagem = "Digite o identificador ou cancele digitando 0:";
-                    int id = lerInteiros(entrada, mensagem);
-
-                    if (id == 0) {
-                        System.out.println("Operação cancelada!");
-                        break;
-                    }
-
                     // LIMPEZA DA ENTRADA
                     entrada.nextLine();
 
@@ -57,10 +49,10 @@ public class Main {
                     }
 
                     // CADASTRO PREÇO
-                    mensagem = "Digite o preço ou cancele digitando 0:";
-                    double preco = lerDoubles(entrada, mensagem);
+                    String mensagem = "Digite o preço ou cancele digitando 0:";
+                    BigDecimal preco = lerPrecos(entrada, mensagem);
 
-                    if (preco == 0) {
+                    if (preco.compareTo(BigDecimal.ZERO) == 0) {
                         System.out.println("Operação cancelada!");
                         break;
                     }
@@ -74,7 +66,13 @@ public class Main {
                         break;
                     }
 
-                    estoque.adicionarProduto(new Produto(id, nome, preco, quantidade));
+                    Produto produtoAtual = new Produto(0, nome, preco, quantidade);
+
+                    try {
+                        estoque.adicionarProduto(produtoAtual);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
 
                     break;
                 case 2:
@@ -102,7 +100,7 @@ public class Main {
 
                     try {
                         estoque.darBaixaNoEstoque(idBaixa, quantidadeBaixa);
-                    } catch (IllegalArgumentException e) {
+                    } catch (RuntimeException e) {
                         System.out.println(e.getMessage());
                     }
 
@@ -160,12 +158,12 @@ public class Main {
         }
     }
 
-    private static double lerDoubles(Scanner entrada, String mensagem) {
+    private static BigDecimal lerPrecos(Scanner entrada, String mensagem) {
         while (true) {
             try {
                 System.out.println(mensagem);
-                double valor = entrada.nextDouble();
-                if (valor < 0) {
+                BigDecimal valor = entrada.nextBigDecimal();
+                if (valor.compareTo(BigDecimal.ZERO) < 0) {
                     System.out.println("Erro: Digite números maiores que 0");
                     continue;
                 }

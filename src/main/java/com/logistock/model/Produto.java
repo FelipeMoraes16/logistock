@@ -1,13 +1,15 @@
 package com.logistock.model;
 
+import java.math.BigDecimal;
+
 public class Produto {
     private int id;
     private String nome;
-    private double preco;
+    private BigDecimal preco;
     private int quantidade;
 
-    public Produto(int id, String nome, double preco, int quantidade) {
-        if (preco <= 0) {
+    public Produto(int id, String nome, BigDecimal preco, int quantidade) {
+        if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Erro: Preço deve ser maior que zero!");
         }
         if (quantidade < 0) {
@@ -35,12 +37,12 @@ public class Produto {
         this.nome = nome;
     }
 
-    public double getPreco() {
+    public BigDecimal getPreco() {
         return preco;
     }
 
-    public void setPreco(double preco) {
-        if (preco <= 0) {
+    public void setPreco(BigDecimal preco) {
+        if (preco == null || preco.compareTo(BigDecimal.ZERO) <= 0) {
            throw new IllegalArgumentException("Erro: Preço deve ser maior que zero!");
         }
         this.preco = preco;

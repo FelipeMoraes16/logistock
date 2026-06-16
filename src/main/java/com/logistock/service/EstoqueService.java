@@ -1,55 +1,59 @@
 package com.logistock.service;
 
 import com.logistock.model.Produto;
-import java.util.ArrayList;
+import com.logistock.ProdutoDAO;
+
 import java.util.List;
 
 public class EstoqueService {
-    private List<Produto> produtos = new ArrayList<>();
+    private ProdutoDAO produtoDao = new ProdutoDAO();
 
     public void adicionarProduto(Produto produto) {
 
-        for (Produto produtoExistente : produtos) {
-            if (produto.getId() == produtoExistente.getId()) {
-                throw new IllegalArgumentException("Erro: ID já existente!");
-            }
-        }
+        produtoDao.inserirProduto(produto);
 
-        produtos.add(produto);
         System.out.println("Produto " + produto.getNome() + " foi adicionado!");
     }
 
     public void listarProdutos(){
-        for (Produto produto : produtos) {
+        List<Produto> listaDoBanco = produtoDao.listarTodos();
+
+        if(listaDoBanco.isEmpty()) {
+            System.out.println("O estoque está vazio no banco de dados.");
+            return;
+        }
+
+        for(Produto produto : listaDoBanco) {
             System.out.println("ID: " + produto.getId());
             System.out.println("Nome: " + produto.getNome());
-            System.out.printf("Preço: %.2f\n", produto.getPreco());
+            System.out.println("Preço: " + produto.getPreco());
             System.out.println("Quantidade: " + produto.getQuantidade() + "\n");
         }
     }
 
     public void darBaixaNoEstoque(int id, int quantidade){
 
-        Produto produtoEstoque = encontrarProduto(id);
+        Produto produtoEstoque = produtoDao.buscarPorId(id);
 
         if (produtoEstoque == null) {
             throw new IllegalArgumentException("Erro: Produto não encontrado!");
         }
 
         if (produtoEstoque.getQuantidade() < quantidade) {
-            throw new IllegalArgumentException("Erro: Quantidade do estoque insuficiente!");
+            throw new IllegalArgumentException("Erro: Quantidade do estoque insuficiente!" +
+            produtoEstoque.getQuantidade());
         }
 
         int novoSaldo = produtoEstoque.getQuantidade() - quantidade;
-        produtoEstoque.setQuantidade(novoSaldo);
+        produtoDao.atualizarQuantidade(id, novoSaldo);
         System.out.println("Quantidade do estoque foi alterado com sucesso!");
     }
 
     public void adicionarSaldoEstoque(int id, int quantidade) {
-       Produto produtoEstoque = encontrarProduto(id);
+       Produto produtoEstoque = produtoDao.buscarPorId(id);
 
         if (produtoEstoque == null) {
-            throw new IllegalArgumentException("Erro: Produto não econtrado!");
+            throw new IllegalArgumentException("Erro: Produto não econtrado no banco de dados !");
         }
 
         if (quantidade <= 0) {
@@ -57,21 +61,8 @@ public class EstoqueService {
         }
 
         int novoSaldo = produtoEstoque.getQuantidade() + quantidade;
-        produtoEstoque.setQuantidade(novoSaldo);
-        System.out.println("Saldo adicionado com sucesso!");
-    }
-
-    public Produto encontrarProduto(int id) {
-
-        Produto produtoEncontrado = null;
-
-        for (Produto produto : produtos) {
-            if (produto.getId() == id) {
-                produtoEncontrado = produto;
-                break;
-            }
-        }
-
-        return produtoEncontrado;
+        produtoDao.atualizarQuantidade(id, novoSaldo);
+        System.out.println("Saldo adicionado com sucesso para o produto: " +
+        produtoEstoque.getNome());
     }
 }
